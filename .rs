@@ -1,0 +1,1 @@
+rsync -avP ./build/. root@80.211.222.212:/var/www/frontend_masters_eshop/build
