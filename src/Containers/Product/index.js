@@ -4,6 +4,8 @@ import styled from 'styled-components';
 import { rem, lighten } from 'polished';
 import { Helmet } from 'react-helmet';
 import API from '../../API';
+import NotFound from '../../Components/NotFound';
+import Loader from '../../Components/Loader';
 
 const Wrapper = styled.div`
   display: flex;
@@ -100,21 +102,35 @@ class Product extends PureComponent {
     this.state = {
       count: 1,
       data: null,
+      isFetching: false,
     };
   }
   componentDidMount() {
-    API.productDetail(this.props.routeParams.productId).then((res) => {
-      this.context.setBreadcrumb(
-        <div>
-          <strong>Produkt: </strong>{res.name}
-        </div>
-      );
-      this.setState({
-        data: res,
-      });
-    }).catch((e) => {
-      console.error(e);
+    this.loadProduct(this.props.routeParams.productId);
+  }
+  loadProduct(id) {
+    this.setState({
+      isFetching: true,
     });
+    API.productDetail(id)
+      .then(res => {
+        this.context.setBreadcrumb(
+          <div>
+            <strong>Produkt: </strong>
+            {res.name}
+          </div>,
+        );
+        this.setState({
+          data: res,
+          isFetching: false,
+        });
+      })
+      .catch(e => {
+        this.setState({
+          isFetching: false,
+        });
+        console.error(e);
+      });
   }
   changeCount(newCount) {
     this.setState({
@@ -122,55 +138,67 @@ class Product extends PureComponent {
     });
   }
   render() {
-    const { data } = this.state;
-    if (!data) {
-      return null;
+    const { data, isFetching } = this.state;
+    if (!data && !isFetching) {
+      return (
+        <Wrapper>
+          <NotFound />
+        </Wrapper>
+      );
     }
     return (
       <Wrapper>
-        <Helmet>
-          <title>{data.name}</title>
-        </Helmet>
-        <ImageWrapper>
-          <Image src={data.image} />
-        </ImageWrapper>
-        <Detail>
-          <Header>{data.name}</Header>
-          <Description dangerouslySetInnerHTML={{ __html: data.description }} />
-          <Price>{data.price}/ks</Price>
-          <AddToCart>
-            <Counter>
-              <Button
-                onClick={() => {
-                  this.changeCount(this.state.count - 1);
-                }}
-              >-
-              </Button>
-              <Input defaultValue={this.state.count} />
-              <Button
-                onClick={() => {
-                  this.changeCount(this.state.count + 1);
-                }}
-              >+
-              </Button>
-            </Counter>
-            <AddToCartButton>
-              <Icon src="/cart.svg" />
-              <Label>
-                Pridať do košíka
-              </Label>
-            </AddToCartButton>
-          </AddToCart>
-        </Detail>
+        {isFetching ? (
+          <Loader />
+        ) : (
+          <React.Fragment>
+            <Helmet>
+              <title>{data.name}</title>
+            </Helmet>
+            <ImageWrapper>
+              <Image src={data.image} />
+            </ImageWrapper>
+            <Detail>
+              <Header>{data.name}</Header>
+              <Description
+                dangerouslySetInnerHTML={{ __html: data.description }}
+              />
+              <Price>{data.price}/ks</Price>
+              <AddToCart>
+                <Counter>
+                  <Button
+                    onClick={() => {
+                      this.changeCount(this.state.count - 1);
+                    }}
+                  >
+                    -
+                  </Button>
+                  <Input defaultValue={this.state.count} />
+                  <Button
+                    onClick={() => {
+                      this.changeCount(this.state.count + 1);
+                    }}
+                  >
+                    +
+                  </Button>
+                </Counter>
+                <AddToCartButton>
+                  <Icon src="/cart.svg" />
+                  <Label>Pridať do košíka</Label>
+                </AddToCartButton>
+              </AddToCart>
+            </Detail>
+          </React.Fragment>
+        )}
       </Wrapper>
-    )
+    );
   }
-};
+}
 
 Product.propTypes = {
   routeParams: PropTypes.shape({
     productId: PropTypes.string,
   }).isRequired,
-}
+};
 
 export default Product;
