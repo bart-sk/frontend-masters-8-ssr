@@ -6,6 +6,7 @@
     "dotenv": "5.0.1",
     "husky": "^0.14.3",
     "js-beautify": "^1.7.5",
+    "lint-staged": "^7.0.4",
     "polished": "^1.9.2",
     "prettier": "^1.12.0",
     "prop-types": "^15.6.1",
@@ -20,7 +21,9 @@
   "scripts": {
     "start": "yarn generate-api && react-scripts start",
     "build": "yarn generate-api && react-scripts build",
-    "generate-api": "node codegen/generate.js"
+    "generate-api": "node codegen/generate.js",
+    "precommit": "lint-staged",
+    "lint": "eslint src"
   },
   "devDependencies": {
     "babel-eslint": "^7.2.3",
