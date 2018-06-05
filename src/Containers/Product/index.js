@@ -1,9 +1,16 @@
 import React, { PureComponent } from 'react';
+import { connect } from 'react-redux';
 import PropTypes from 'prop-types';
 import styled from 'styled-components';
 import { rem, lighten } from 'polished';
 import { Helmet } from 'react-helmet';
-import API from '../../API';
+import { loadProductDetail } from './actions';
+import {
+  currentProductDetailSelector,
+  currentProductIsFetchingSelector,
+} from './selectors';
+import NotFound from '../../Components/NotFound';
+import Loader from '../../Components/Loader';
 
 const Wrapper = styled.div`
   display: flex;
@@ -99,33 +106,39 @@ class Product extends PureComponent {
     super(props);
     this.state = {
       count: 1,
-      data: null,
     };
   }
-  componentDidMount() {
-    API.productDetail(this.props.routeParams.productId).then((res) => {
-      this.context.setBreadcrumb(
-        <div>
-          <strong>Produkt: </strong>{res.name}
-        </div>
-      );
-      this.setState({
-        data: res,
-      });
-    }).catch((e) => {
-      console.error(e);
-    });
+  async componentDidMount() {
+    const { dispatch } = this.props;
+    await dispatch(loadProductDetail(this.props.routeParams.productId));
+    this.context.setBreadcrumb(
+      <div>
+        <strong>Produkt: </strong>
+        {this.props.data.name}
+      </div>,
+    );
   }
+
   changeCount(newCount) {
     this.setState({
       count: newCount > 1 ? newCount : 1,
     });
   }
   render() {
-    const { data } = this.state;
-    if (!data) {
-      return null;
+    const { data, isFetching } = this.props;
+
+    if (!data && !isFetching) {
+      return (
+        <Wrapper>
+          <NotFound />
+        </Wrapper>
+      );
     }
+
+    if (isFetching) {
+      return <Loader />;
+    }
+
     return (
       <Wrapper>
         <Helmet>
@@ -144,33 +157,53 @@ class Product extends PureComponent {
                 onClick={() => {
                   this.changeCount(this.state.count - 1);
                 }}
-              >-
+              >
+                -
               </Button>
               <Input defaultValue={this.state.count} />
               <Button
                 onClick={() => {
                   this.changeCount(this.state.count + 1);
                 }}
-              >+
+              >
+                +
               </Button>
             </Counter>
             <AddToCartButton>
               <Icon src="/cart.svg" />
-              <Label>
-                Pridať do košíka
-              </Label>
+              <Label>Pridať do košíka</Label>
             </AddToCartButton>
           </AddToCart>
         </Detail>
       </Wrapper>
-    )
+    );
   }
-};
+}
 
 Product.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  isFetching: PropTypes.bool.isRequired,
+  data: PropTypes.shape({
+    _id: PropTypes.string,
+    image: PropTypes.string,
+    name: PropTypes.string,
+    price: PropTypes.string,
+  }),
   routeParams: PropTypes.shape({
     productId: PropTypes.string,
   }).isRequired,
-}
+};
 
-export default Product;
+Product.defaultProps = {
+  data: null,
+};
+
+const mapStateToProps = (state, props) => {
+  const { productId } = props.routeParams;
+  return {
+    isFetching: currentProductIsFetchingSelector(productId)(state),
+    data: currentProductDetailSelector(productId)(state),
+  };
+};
+
+export default connect(mapStateToProps)(Product);

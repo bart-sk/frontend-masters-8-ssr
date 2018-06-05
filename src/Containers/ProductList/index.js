@@ -4,7 +4,12 @@ import PropTypes from 'prop-types';
 import { rem } from 'polished';
 import { Link } from 'react-router';
 import { Helmet } from 'react-helmet';
-import API from '../../API';
+import { connect } from 'react-redux';
+
+import { loadProducts } from './actions';
+import { productsSelector, productsIsFetchingSelector } from './selectors';
+
+import Loader from '../../Components/Loader';
 
 const Wrapper = styled.div`
   display: flex;
@@ -12,7 +17,7 @@ const Wrapper = styled.div`
   flex-wrap: wrap;
   flex: 0 0 100%;
 `;
-const Item = styled(Link) `
+const Item = styled(Link)`
   flex: 0 0 22%;
   background: white;
   margin: 1.5%;
@@ -58,52 +63,63 @@ class ProductList extends PureComponent {
   static contextTypes = {
     setBreadcrumb: PropTypes.func,
   };
-  constructor(props) {
-    super(props);
-    this.state = {
-      items: [],
-    };
-  }
+
   componentDidMount() {
+    const { dispatch } = this.props;
     this.context.setBreadcrumb(
       <div>
         <strong>Kategória: </strong>Domáce potreby
-      </div>
+      </div>,
     );
-    API.listProducts().then((res) => {
-      this.setState({
-        items: res.products,
-      });
-    }).catch((e) => {
-      console.error(e);
-    });
+    dispatch(loadProducts());
   }
+
   render() {
-    const { items } = this.state;
-    if (items.length === 0) {
-      return null;
-    }
+    const { products, isFetching } = this.props;
+
     return (
       <Wrapper>
         <Helmet>
           <title>Domáce potreby</title>
         </Helmet>
-        {items.map((item) => {
-          return (
-            <Item key={item._id} to={`/product/${item._id}`}>
-              <ImageWrapper>
-                <Img src={item.image} />
-              </ImageWrapper>
-              <Description>
-                <Name>{item.name}</Name>
-                <Price>{item.price}</Price>
-              </Description>
-            </Item>
-          );
-        })}
+        {isFetching ? (
+          <Loader />
+        ) : (
+          products.map(item => {
+            return (
+              <Item key={item._id} to={`/product/${item._id}`}>
+                <ImageWrapper>
+                  <Img src={item.image} />
+                </ImageWrapper>
+                <Description>
+                  <Name>{item.name}</Name>
+                  <Price>{item.price}</Price>
+                </Description>
+              </Item>
+            );
+          })
+        )}
       </Wrapper>
     );
   }
 }
 
-export default ProductList;
+ProductList.propTypes = {
+  dispatch: PropTypes.func.isRequired,
+  products: PropTypes.arrayOf(
+    PropTypes.shape({
+      _id: PropTypes.string,
+      image: PropTypes.string,
+      name: PropTypes.string,
+      price: PropTypes.string,
+    }),
+  ).isRequired,
+  isFetching: PropTypes.bool.isRequired,
+};
+
+const mapStateToProps = state => ({
+  products: productsSelector(state),
+  isFetching: productsIsFetchingSelector(state),
+});
+
+export default connect(mapStateToProps)(ProductList);

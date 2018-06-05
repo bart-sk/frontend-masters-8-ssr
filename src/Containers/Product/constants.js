@@ -1,0 +1,5 @@
+const namespace = 'Product';
+
+export const FETCH_PRODUCT_DETAIL_REQUEST = `${namespace}/FETCH_PRODUCT_DETAIL_REQUEST`;
+export const FETCH_PRODUCT_DETAIL_FAILURE = `${namespace}/FETCH_PRODUCT_DETAIL_FAILURE`;
+export const FETCH_PRODUCT_DETAIL_SUCCESS = `${namespace}/FETCH_PRODUCT_DETAIL_SUCCESS`;

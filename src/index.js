@@ -1,12 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import { Provider } from 'react-redux';
 import { injectGlobal, ThemeProvider } from 'styled-components';
 import { Router, Route, browserHistory } from 'react-router';
 import theme from './theme';
 import API from './API';
 import App from './Containers/App';
 import Product from './Containers/Product';
-import ProductList from './Components/ProductList';
+import ProductList from './Containers/ProductList';
+
+import configureStore from './configureStore';
 
 // eslint-disable-next-line
 injectGlobal`
@@ -27,13 +30,19 @@ injectGlobal`
 
 API.setBaseUrl(process.env.REACT_APP_API_BASE_URL);
 
+// Initialise redux store
+const store = configureStore();
+
 ReactDOM.render(
-  <ThemeProvider theme={theme}>
-    <Router history={browserHistory}>
-      <Route component={App}>
-        <Route path="/" component={ProductList} />
-        <Route path="/product/:productId" component={Product} />
-      </Route>
-    </Router>
-  </ThemeProvider>
-  , document.getElementById('root'));
+  <Provider store={store}>
+    <ThemeProvider theme={theme}>
+      <Router history={browserHistory}>
+        <Route component={App}>
+          <Route path="/" component={ProductList} />
+          <Route path="/product/:productId" component={Product} />
+        </Route>
+      </Router>
+    </ThemeProvider>
+  </Provider>,
+  document.getElementById('root'),
+);
