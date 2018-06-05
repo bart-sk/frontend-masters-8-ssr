@@ -4,9 +4,10 @@
   "private": true,
   "dependencies": {
     "dotenv": "5.0.1",
-    "history": "3.5.1",
+    "husky": "^0.14.3",
     "js-beautify": "^1.7.5",
     "polished": "^1.9.2",
+    "prettier": "^1.12.0",
     "prop-types": "^15.6.1",
     "react": "^16.4.0",
     "react-dom": "^16.4.0",
@@ -22,14 +23,21 @@
     "generate-api": "node codegen/generate.js"
   },
   "devDependencies": {
-    "babel-eslint": "^8.2.3",
+    "babel-eslint": "^7.2.3",
     "eslint": "^4.19.1",
     "eslint-config-airbnb": "^16.1.0",
     "eslint-config-prettier": "^2.9.0",
     "eslint-config-react-app": "^2.1.0",
     "eslint-plugin-flowtype": "^2.48.0",
     "eslint-plugin-import": "^2.12.0",
-    "eslint-plugin-jsx-a11y": "^6.0.3",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
     "eslint-plugin-react": "^7.8.2"
+  },
+  "lint-staged": {
+    "src/**/*.{js,jsx,json}": [
+      "eslint",
+      "prettier --write",
+      "git add"
+    ]
   }
 }
