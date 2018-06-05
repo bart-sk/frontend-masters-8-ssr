@@ -5,6 +5,7 @@ import { rem } from 'polished';
 import { Link } from 'react-router';
 import { Helmet } from 'react-helmet';
 import API from '../../API';
+import Loader from '../../Components/Loader';
 
 const Wrapper = styled.div`
   display: flex;
@@ -12,7 +13,7 @@ const Wrapper = styled.div`
   flex-wrap: wrap;
   flex: 0 0 100%;
 `;
-const Item = styled(Link) `
+const Item = styled(Link)`
   flex: 0 0 22%;
   background: white;
   margin: 1.5%;
@@ -62,33 +63,45 @@ class ProductList extends PureComponent {
     super(props);
     this.state = {
       items: [],
+      isFetching: false,
     };
+    this.loadProducts = this.loadProducts.bind(this);
   }
   componentDidMount() {
     this.context.setBreadcrumb(
       <div>
         <strong>Kategória: </strong>Domáce potreby
-      </div>
+      </div>,
     );
-    API.listProducts().then((res) => {
-      this.setState({
-        items: res.products,
-      });
-    }).catch((e) => {
-      console.error(e);
+    this.loadProducts();
+  }
+  loadProducts() {
+    this.setState({
+      isFetching: true,
     });
+    API.listProducts()
+      .then(res => {
+        this.setState({
+          items: res.products,
+          isFetching: false,
+        });
+      })
+      .catch(e => {
+        this.setState({
+          isFetching: false,
+        });
+        console.error(e);
+      });
   }
   render() {
-    const { items } = this.state;
-    if (items.length === 0) {
-      return null;
-    }
+    const { items, isFetching } = this.state;
     return (
       <Wrapper>
         <Helmet>
           <title>Domáce potreby</title>
         </Helmet>
-        {items.map((item) => {
+        {isFetching && <Loader />}
+        {items.map(item => {
           return (
             <Item key={item._id} to={`/product/${item._id}`}>
               <ImageWrapper>

@@ -1,12 +1,13 @@
-import React from "react";
-import ReactDOM from "react-dom";
-import { injectGlobal, ThemeProvider } from "styled-components";
-import { Router, Route, browserHistory } from "react-router";
-import theme from "./theme";
-import API from "./API";
-import App from "./Containers/App";
-import Product from "./Containers/Product";
-import ProductList from "./Containers/ProductList";
+import React from 'react';
+import ReactDOM from 'react-dom';
+import { injectGlobal, ThemeProvider } from 'styled-components';
+import { Router, Route, browserHistory } from 'react-router';
+import theme from './theme';
+import API from './API';
+import NotFound from './Components/NotFound';
+import App from './Containers/App';
+import Product from './Containers/Product';
+import ProductList from './Containers/ProductList';
 
 // eslint-disable-next-line
 injectGlobal`
@@ -33,8 +34,9 @@ ReactDOM.render(
       <Route component={App}>
         <Route path="/" component={ProductList} />
         <Route path="/product/:productId" component={Product} />
+        <Route path="*" component={NotFound} />
       </Route>
     </Router>
   </ThemeProvider>,
-  document.getElementById("root")
+  document.getElementById('root'),
 );
