@@ -111,12 +111,14 @@ class Product extends PureComponent {
   async componentDidMount() {
     const { dispatch } = this.props;
     await dispatch(loadProductDetail(this.props.routeParams.productId));
-    this.context.setBreadcrumb(
-      <div>
-        <strong>Produkt: </strong>
-        {this.props.data.name}
-      </div>,
-    );
+    if (this.props.data) {
+      this.context.setBreadcrumb(
+        <div>
+          <strong>Produkt: </strong>
+          {this.props.data.name}
+        </div>,
+      );
+    }
   }
 
   changeCount(newCount) {
