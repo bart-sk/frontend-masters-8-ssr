@@ -64,6 +64,10 @@ class ProductList extends PureComponent {
     setBreadcrumb: PropTypes.func,
   };
 
+  static init(dispatch) {
+    return Promise.all([dispatch(loadProducts())]);
+  }
+
   componentDidMount() {
     const { dispatch } = this.props;
     this.context.setBreadcrumb(
@@ -71,7 +75,7 @@ class ProductList extends PureComponent {
         <strong>Kategória: </strong>Domáce potreby
       </div>,
     );
-    dispatch(loadProducts());
+    ProductList.init(dispatch);
   }
 
   render() {
@@ -103,6 +107,10 @@ class ProductList extends PureComponent {
     );
   }
 }
+
+ProductList.fetchData = ({ store }) => {
+  return ProductList.init(store.dispatch);
+};
 
 ProductList.propTypes = {
   dispatch: PropTypes.func.isRequired,

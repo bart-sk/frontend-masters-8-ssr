@@ -102,15 +102,28 @@ class Product extends PureComponent {
   static contextTypes = {
     setBreadcrumb: PropTypes.func,
   };
+
+  static init(dispatch, props) {
+    const {
+      routeParams: { productId },
+    } = props;
+    return Promise.all([dispatch(loadProductDetail(productId))]);
+  }
+
   constructor(props) {
     super(props);
     this.state = {
       count: 1,
     };
   }
+
   async componentDidMount() {
     const { dispatch } = this.props;
-    await dispatch(loadProductDetail(this.props.routeParams.productId));
+    try {
+      await Product.init(dispatch, this.props);
+    } catch (e) {
+      // No need to handle 404 error here
+    }
     if (this.props.data) {
       this.context.setBreadcrumb(
         <div>
@@ -118,6 +131,16 @@ class Product extends PureComponent {
           {this.props.data.name}
         </div>,
       );
+    }
+  }
+
+  componentWillReceiveProps(nextProps) {
+    if (nextProps.location.pathname !== this.props.location.pathname) {
+      try {
+        Product.init(nextProps.dispatch, nextProps);
+      } catch (e) {
+        // No need to handle 404 error here
+      }
     }
   }
 
@@ -182,6 +205,10 @@ class Product extends PureComponent {
   }
 }
 
+Product.fetchData = ({ store, renderProps }) => {
+  return Product.init(store.dispatch, renderProps);
+};
+
 Product.propTypes = {
   dispatch: PropTypes.func.isRequired,
   isFetching: PropTypes.bool.isRequired,
@@ -191,8 +218,12 @@ Product.propTypes = {
     name: PropTypes.string,
     price: PropTypes.string,
   }),
+  // eslint-disable-next-line
   routeParams: PropTypes.shape({
     productId: PropTypes.string,
+  }).isRequired,
+  location: PropTypes.shape({
+    pathname: PropTypes.string.isRequired,
   }).isRequired,
 };
 

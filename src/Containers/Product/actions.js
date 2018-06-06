@@ -5,6 +5,7 @@ import {
   FETCH_PRODUCT_DETAIL_SUCCESS,
 } from './constants';
 import { productSchema } from '../../schemas';
+import { NotFoundError } from '../../errors';
 
 const requestProductDetail = id => ({
   type: FETCH_PRODUCT_DETAIL_REQUEST,
@@ -44,6 +45,8 @@ export const loadProductDetail = id => {
       );
     } catch (e) {
       dispatch(requestProductDetailFailure(id));
+      // Page does not exist -> thow error for server to handle
+      throw new NotFoundError();
     }
   };
 };
