@@ -33,6 +33,7 @@
   "scripts": {
     "start": "yarn generate-api && react-scripts start",
     "start:server": "NODE_ENV=development nodemon --exec babel-node server/index.js",
+    "start:server:wv": "nodemon --exec babel-node server/index.js",
     "build": "yarn generate-api && react-scripts build",
     "production": "NODE_ENV=production node server/index.js",
     "generate-api": "node codegen/generate.js",
@@ -40,7 +41,6 @@
     "lint": "eslint src"
   },
   "devDependencies": {
-    "babel-cli": "^6.26.0",
     "babel-eslint": "^7.2.3",
     "eslint": "^4.19.1",
     "eslint-config-airbnb": "^16.1.0",

@@ -1,23 +1,22 @@
-import { config } from 'dotenv';
 import 'ignore-styles';
 import express from 'express';
 import morgan from 'morgan';
 import path from 'path';
 import universalLoader from './universal';
 
-require('babel-register')({
-  ignore: /\/(build|node_modules)\//,
-  presets: ['env', 'react-app'],
-});
-
+// Create express server
 const app = express();
 
-config();
+// Set logging middleware
 app.use(morgan('dev'));
 
+// Match only homepage
 app.use('^/$', universalLoader);
 
 // Serve static assets
 app.use(express.static(path.resolve(process.env.SSR_PUBLIC_FOLDER)));
 
+// Match other routes in app
 app.use('/', universalLoader);
+
+export default app;
