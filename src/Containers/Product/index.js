@@ -105,7 +105,7 @@ class Product extends PureComponent {
 
   static init(dispatch, props) {
     const {
-      routeParams: { productId },
+      params: { productId },
     } = props;
     return Promise.all([dispatch(loadProductDetail(productId))]);
   }
@@ -219,7 +219,7 @@ Product.propTypes = {
     price: PropTypes.string,
   }),
   // eslint-disable-next-line
-  routeParams: PropTypes.shape({
+  params: PropTypes.shape({
     productId: PropTypes.string,
   }).isRequired,
   location: PropTypes.shape({
@@ -232,7 +232,7 @@ Product.defaultProps = {
 };
 
 const mapStateToProps = (state, props) => {
-  const { productId } = props.routeParams;
+  const { productId } = props.params;
   return {
     isFetching: currentProductIsFetchingSelector(productId)(state),
     data: currentProductDetailSelector(productId)(state),
