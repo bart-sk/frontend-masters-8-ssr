@@ -43,7 +43,7 @@ function renderApp(res, renderProps, store, htmlData) {
     .replace('<div id="root"></div>', `<div id="root">${ReactApp}</div>`)
     .replace('</head>', `${styleTags}</head>`)
     .replace('"{{SSR_INITIAL_STATE}}"', JSON.stringify(store.getState()))
-    .replace('<title/>', title)
+    .replace('<title></title>', title)
     .replace('<meta id="helmet">', meta);
   res.send(RenderedApp);
 }
