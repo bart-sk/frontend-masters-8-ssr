@@ -103,9 +103,8 @@ function isNotFound(components) {
   return false;
 }
 
-/* SSR FLOW */
+/* SSR FLOW ON SERVER */
 
-// Request page -- client
 // Match route
 // Fetch data
 // Render page
