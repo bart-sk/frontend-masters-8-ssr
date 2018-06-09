@@ -23,7 +23,19 @@ API.setBaseUrl(process.env.REACT_APP_API_BASE_URL);
 // Create routes
 const routes = createRoutes({});
 
-function renderApp(res, renderProps, store, htmlData) {
+// Load default index.html as string
+let defaultPage = '';
+const filePath = path.resolve(process.env.SSR_PUBLIC_FOLDER, 'index.html');
+fs.readFile(filePath, 'utf8', (readError, htmlData) => {
+  if (readError) {
+    console.error('read error', readError);
+  } else {
+    console.error('Default page is ready!');
+    defaultPage = htmlData;
+  }
+});
+
+function renderPage(store, renderProps) {
   const sheet = new ServerStyleSheet();
   const ReactApp = renderToString(
     <StyleSheetManager sheet={sheet.instance}>
@@ -39,58 +51,85 @@ function renderApp(res, renderProps, store, htmlData) {
   const meta = head.meta.toString();
   const styleTags = sheet.getStyleTags();
 
-  const RenderedApp = htmlData
+  const renderedPage = defaultPage
     .replace('<div id="root"></div>', `<div id="root">${ReactApp}</div>`)
     .replace('</head>', `${styleTags}</head>`)
     .replace('"{{SSR_INITIAL_STATE}}"', JSON.stringify(store.getState()))
     .replace('<title></title>', title)
     .replace('<meta id="helmet">', meta);
-  res.send(RenderedApp);
+  return renderedPage;
 }
 
-async function renderPage(res, renderProps, htmlData) {
+async function makeStore(res, renderProps) {
   // Create store
   const store = configureStore();
   // Fetch all data
   const { components } = renderProps;
-  for (let i = 0; i < components.length; i++) {
-    const comp = components[i];
-    if (comp && comp.fetchData) {
-      try {
-        await comp.fetchData({ store, renderProps }); // eslint-disable-line
-      } catch (error) {
-        if (error.identifier === 'NOT_FOUND') {
-          res.status(404);
-        } else {
-          console.error('fetch failed: ', error);
-        }
-      }
+  const promises = components
+    .filter(comp => comp && comp.fetchData)
+    .map(comp => comp.fetchData({ store, renderProps }));
+  try {
+    await Promise.all(promises);
+  } catch (error) {
+    if (error.identifier === 'NOT_FOUND') {
+      res.status(404);
+    } else {
+      console.error('fetch failed: ', error);
     }
   }
-  // Render app
-  renderApp(res, renderProps, store, htmlData);
+
+  // for (let i = 0; i < components.length; i++) {
+  //   const comp = components[i];
+  //   if (comp && comp.fetchData) {
+  //     try {
+  //       await comp.fetchData({ store, renderProps }); // eslint-disable-line
+  //     } catch (error) {
+  //       if (error.identifier === 'NOT_FOUND') {
+  //         res.status(404);
+  //       } else {
+  //         console.error('fetch failed: ', error);
+  //       }
+  //     }
+  //   }
+  // }
+
+  return store;
 }
 
-// Handle routing and send rendered page
+function isNotFound(components) {
+  if (!components) return true;
+  if (components.length === 0) return true;
+  if (components[components.length - 1].name === 'NotFound') return true;
+  return false;
+}
+
+/* SSR FLOW */
+
+// Request page -- client
+// Match route
+// Fetch data
+// Render page
+// Send prerendered page
+
 const universalLoader = (req, res) => {
-  const filePath = path.resolve(process.env.SSR_PUBLIC_FOLDER, 'index.html');
-  fs.readFile(filePath, 'utf8', (readError, htmlData) => {
-    if (readError) {
-      console.error('read error', readError);
-      return res.status(404).end();
+  // Match route
+  match({ routes, location: req.url }, async (err, redirect, renderProps) => {
+    if (err) {
+      console.error('match err', err);
+      return res.status(500).end();
+    } else if (redirect) {
+      return res.redirect(302, redirect.pathname + redirect.search);
+    } else if (renderProps) {
+      // Fetch all data and fill redux store
+      const store = await makeStore(res, renderProps);
+
+      if (isNotFound(renderProps.components)) res.status(404);
+      // Render page
+      const renderedPage = renderPage(store, renderProps);
+      // Send prerendered page
+      return res.send(renderedPage);
     }
-    match({ routes, location: req.url }, (err, redirect, renderProps) => {
-      if (err) {
-        console.error('match err', err);
-        return res.status(404).end();
-      } else if (redirect) {
-        res.redirect(302, redirect.pathname + redirect.search);
-      } else if (renderProps) {
-        renderPage(res, renderProps, htmlData);
-      } else {
-        return res.status(404).end();
-      }
-    });
+    return res.status(404).end();
   });
 };
 

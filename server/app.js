@@ -16,7 +16,7 @@ app.use('^/$', universalLoader);
 // Serve static assets
 app.use(express.static(path.resolve(process.env.SSR_PUBLIC_FOLDER)));
 
-// Match other routes in app
-app.use('/', universalLoader);
+// Match all other routes
+app.use(universalLoader);
 
 export default app;
