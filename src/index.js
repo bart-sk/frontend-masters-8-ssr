@@ -21,7 +21,7 @@ if (initialState !== '{{SSR_INITIAL_STATE}}') {
 // Initialise redux store
 const store = configureStore(defaultState);
 
-ReactDOM.render(
+ReactDOM.hydrate(
   <Provider store={store}>
     <ThemeProvider theme={theme}>
       <Router history={browserHistory} />

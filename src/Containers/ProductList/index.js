@@ -86,7 +86,7 @@ class ProductList extends PureComponent {
         <Helmet>
           <title>Domáce potreby</title>
         </Helmet>
-        {isFetching ? (
+        {isFetching && products.length === 0 ? (
           <Loader />
         ) : (
           products.map(item => {
