@@ -10,7 +10,8 @@ import {
   ServerStyleSheet,
   StyleSheetManager,
 } from 'styled-components';
-import 'sanitize.css/sanitize.css';
+import 'ignore-styles';
+import serialize from 'serialize-javascript';
 import '../src/globalStyles';
 import theme from '../src/theme';
 import createRoutes from '../src/routes';
@@ -50,11 +51,12 @@ function renderPage(store, renderProps) {
   const title = head.title.toString();
   const meta = head.meta.toString();
   const styleTags = sheet.getStyleTags();
+  const state = store.getState();
 
   const renderedPage = defaultPage
     .replace('<div id="root"></div>', `<div id="root">${ReactApp}</div>`)
     .replace('</head>', `${styleTags}</head>`)
-    .replace('"{{SSR_INITIAL_STATE}}"', JSON.stringify(store.getState()))
+    .replace('"{{SSR_INITIAL_STATE}}"', serialize(state, { isJSON: true }))
     .replace('<title></title>', title)
     .replace('<meta id="helmet">', meta);
   return renderedPage;
