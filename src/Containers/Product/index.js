@@ -105,7 +105,7 @@ class Product extends PureComponent {
 
   static init(dispatch, props) {
     const {
-      params: { productId },
+      params: { productId }, // no routeParams on server -> use params
     } = props;
     return Promise.all([dispatch(loadProductDetail(productId))]);
   }
