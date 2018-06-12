@@ -137,7 +137,7 @@ class Product extends PureComponent {
       );
     }
 
-    if (isFetching) {
+    if (isFetching && !data) {
       return <Loader />;
     }
 
