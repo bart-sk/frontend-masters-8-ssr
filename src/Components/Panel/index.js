@@ -9,7 +9,7 @@ const Wrapper = styled.div`
   width: 100%;
   flex-direction: row;
 `;
-const LogoWrapper = styled(Link) `
+const LogoWrapper = styled(Link)`
   background: ${({ theme }) => theme.color.primary};
   flex-basis: 10%;
   display: flex;
@@ -44,7 +44,7 @@ const Categories = styled.div`
   flex-basis: 90%;
   padding: ${rem(35)} ${rem(25)};
   width: 100%;
-  background: #1E222D;
+  background: #1e222d;
 `;
 const Category = styled.div`
   color: white;
@@ -61,12 +61,13 @@ const Category = styled.div`
 `;
 const Header = styled.div`
   padding: ${rem(25)};
-  background: #6D788B;
+  background: #6d788b;
   padding-left: ${rem(25)};
   color: white;
   letter-spacing: ${rem(2)};
   text-transform: uppercase;
   font-size: ${rem(14)};
+  min-height: ${rem(67)};
 `;
 const CartWrapper = styled.div`
   background: ${({ theme }) => theme.color.primary};
@@ -90,7 +91,9 @@ class Panel extends PureComponent {
       <Wrapper>
         <LogoWrapper to="/">
           <Logo src="/logo.svg" />
-          <LogoTitle>Frontend<br />Masters</LogoTitle>
+          <LogoTitle>
+            Frontend<br />Masters
+          </LogoTitle>
         </LogoWrapper>
         <RightSide>
           <MenuWrapper>
@@ -101,9 +104,7 @@ class Panel extends PureComponent {
               <CartIcon src="/cart.svg" />
             </CartWrapper>
           </MenuWrapper>
-          <Header>
-            {this.props.breadcrumb}
-          </Header>
+          <Header>{this.props.breadcrumb}</Header>
         </RightSide>
       </Wrapper>
     );

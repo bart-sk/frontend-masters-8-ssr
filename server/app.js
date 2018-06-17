@@ -1,13 +1,9 @@
 import express from 'express';
-import morgan from 'morgan';
 import path from 'path';
 import universalLoader from './universal';
 
 // Create express server
 const app = express();
-
-// Set logging middleware
-app.use(morgan('dev'));
 
 // Match only homepage
 app.use('^/$', universalLoader);
