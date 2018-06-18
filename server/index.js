@@ -15,5 +15,3 @@ app
   .on('error', error => {
     console.error('Listen error: ', error);
   });
-
-// -- JUMP TO SLIDES

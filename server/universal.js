@@ -71,7 +71,6 @@ async function makeStore(res, renderProps) {
     const comp = components[i];
     if (comp && comp.fetchData) {
       try {
-        // -- JUMP TO SLIDES
         await comp.fetchData({ store, renderProps }); // eslint-disable-line
       } catch (error) {
         if (error.identifier === 'NOT_FOUND') {
